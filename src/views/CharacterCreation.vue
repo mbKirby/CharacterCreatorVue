@@ -488,9 +488,7 @@
               <label for="skill">{{ spell.name }}</label>
             </span>
           </div>
-          <div v-else-if="!spellCasters.includes(classSelection)">
-            No spells to learn.
-          </div>
+          <div v-else>No spells to learn.</div>
         </div>
         <!-- <p>Select cantrips</p>
           <p :key="spell" v-for="spell in spells">
