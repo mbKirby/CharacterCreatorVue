@@ -25,7 +25,7 @@ export default {
     getUser() {
       axios({
         method: "get",
-        url: "http://127.0.0.1:5050/user/",
+        url: "https://character-creator-drf.herokuapp.com/user/",
         headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
       })
         .then((response) => {
@@ -41,7 +41,7 @@ export default {
     this.getUser(),
       axios({
         method: "get",
-        url: "http://127.0.0.1:5050/characters/",
+        url: "https://character-creator-drf.herokuapp.com/characters/",
         headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
       })
         .then((response) => {

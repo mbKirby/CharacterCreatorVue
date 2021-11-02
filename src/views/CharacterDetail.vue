@@ -190,7 +190,9 @@ export default {
     getCharacter() {
       return axios({
         method: "get",
-        url: "http://127.0.0.1:5050/characters/" + `${this.characterName}`,
+        url:
+          "https://character-creator-drf.herokuapp.com/characters/" +
+          `${this.characterName}`,
         headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
       })
         .then((response) => {
@@ -346,7 +348,9 @@ export default {
     deleteCharacter() {
       axios({
         method: "delete",
-        url: "http://127.0.0.1:5050/characters/" + `${this.characterName}`,
+        url:
+          "https://character-creator-drf.herokuapp.com/characters/" +
+          `${this.characterName}`,
         headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
       }).then(() => {
         this.$router.push({ name: "character-sheet" });
@@ -355,7 +359,9 @@ export default {
     saveCharacter() {
       axios({
         method: "patch",
-        url: "http://127.0.0.1:5050/characters/" + `${this.characterName}`,
+        url:
+          "https://character-creator-drf.herokuapp.com/characters/" +
+          `${this.characterName}`,
         headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
         data: {
           characterLevel: character.characterLevel,

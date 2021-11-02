@@ -69,7 +69,7 @@ export default {
       if (this.matched()) {
         axios({
           method: "post",
-          url: "http://127.0.0.1:5050/create/",
+          url: "https://character-creator-drf.herokuapp.com/create/",
           data: {
             username: this.username,
             password: this.password1,
