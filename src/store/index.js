@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import axios from 'axios'
 import createPersistedState from 'vuex-persistedstate'
 const getAPI = axios.create({
-  baseURL: 'http://127.0.0.1:5050/',
+  baseURL: 'https://character-creator-drf.herokuapp.com/',
 })
 export default createStore({
   state: {
