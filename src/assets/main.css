@@ -1,4 +1,12 @@
-a {
-    color: orangered;
-    text-decoration: none;
+a{
+    text-decoration:none;
 }
+a:hover{
+    text-decoration:overline underline;
+}
+
+#whole {
+    font-family: 'Playfair Display', serif;
+    background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);}
+
+ 

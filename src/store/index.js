@@ -14,7 +14,9 @@ export default createStore({
     test: null,
   },
   plugins:
-    [createPersistedState()],
+    [createPersistedState({
+      storage: window.sessionStorage,
+    })],
   mutations: {
     updateStorage(state, { access, refresh }) {
       state.accessToken = access

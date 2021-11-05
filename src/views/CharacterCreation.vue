@@ -132,6 +132,7 @@
                 v-model="characterLevel"
                 id="characterLevel"
                 type="number"
+                disabled
               />
             </div>
 
@@ -234,15 +235,20 @@
               name="races"
               v-bind:value="race.name"
               v-model="raceSelection"
-              @change="getSubRace()"
+              @change="
+                getSubRace();
+                getSpeed();
+                getAllLanguages();
+                getKnownLanguages();
+              "
             />
             <label class="form-check-label" for="race.name">
               {{ race.name }}
             </label>
           </div>
         </div>
-        <hr />
         <div class="" v-if="subRaces">
+          <hr />
           <label for="subRaceSelection">Select Subrace</label>
           <select
             class="form-select"
@@ -256,6 +262,7 @@
         </div>
 
         <div class="" v-else-if="dragonAncestory">
+          <hr />
           <label for="subRaceSelection">Select Dragon Ancestory</label>
           <select
             class="form-select"
@@ -289,6 +296,7 @@
                 getProficiencyChoices();
                 getEquipment();
                 getSpells();
+                getClassSpells();
               "
             />
             <label class="form-check-label" for="clas.name">
@@ -297,19 +305,21 @@
           </div>
         </div>
         <hr />
-        <p>Select character sub class.</p>
-        <div v-bind:key="subClass.name" v-for="subClass in subClasses">
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="subClasses"
-              v-bind:value="subClass.name"
-              v-model="subClassSelection"
-            />
-            <label class="form-check-label" for="subClass.name">
-              {{ subClass.name }}
-            </label>
+        <div v-if="characterLevel > 1">
+          <p>Select character sub class.</p>
+          <div v-bind:key="subClass.name" v-for="subClass in subClasses">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="subClasses"
+                v-bind:value="subClass.name"
+                v-model="subClassSelection"
+              />
+              <label class="form-check-label" for="subClass.name">
+                {{ subClass.name }}
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -372,6 +382,7 @@
               name="backgrounds"
               v-bind:value="backgroun.name"
               v-model="background"
+              @change="addAcoclyteProficiency()"
             />
             <label class="form-check-label" for="background.name">
               {{ backgroun.name }}
@@ -386,6 +397,7 @@
               name="backgrounds"
               v-bind:value="'Custom'"
               v-model="background"
+              @change="addAcoclyteProficiency()"
             />
             <label class="form-check-label" for="background.name">
               Custom
@@ -409,44 +421,224 @@
         role="tabpanel"
         aria-labelledby="proficiency-tab"
       >
-        <div>
-          <p v-if="proficiencyChoices">
-            Select {{ amountOfProficiencies }} proficiencies.
+        <!-- Proficiencies -->
+        <div class="row">
+          <p v-if="proficiencyChoices && background === 'Acolyte'">
+            Select {{ amountOfProficiencies }} proficiencies. If disabled
+            proficiency is already selected because you chose Acolyte as your
+            background.
           </p>
-          <span :key="proficiency" v-for="proficiency in proficiencyChoices">
+          <p v-else>Select {{ amountOfProficiencies }} proficiencies.</p>
+          <span
+            class="col-12 col-sm-6 col-md-4"
+            :key="proficiency"
+            v-for="proficiency in proficiencyChoices"
+          >
             <input
               class="mx-2"
               type="checkbox"
               v-bind:value="proficiency.name.substr(7)"
               v-model="proficiencySelection"
               v-bind:disabled="
-                proficiencySelection.length === amountOfProficiencies &&
-                proficiencySelection.indexOf(proficiency.name.substr(7)) == -1
+                (proficiencySelection.length === amountOfProficiencies &&
+                  proficiencySelection.indexOf(proficiency.name.substr(7)) ==
+                    -1) ||
+                backgroundProficiencySelection.includes(
+                  proficiency.name.substr(7)
+                )
               "
             />
             <label for="proficiency.name">{{
               proficiency.name.substr(7)
             }}</label>
           </span>
+          <hr class="mt-2" />
         </div>
-        <div v-if="background != 'Acolyte' || null">
+        <!-- background proficiencies -->
+        <div class="row" v-if="background != 'Acolyte' || null">
           <p>Background: {{ customBackground }}</p>
           <p>Select 2 proficiencies for your characters background.</p>
-          <span :key="proficiency" v-for="proficiency in proficiencies">
-            <span :key="skill" v-for="skill in proficiency">
+          <span
+            class="col-12 col-sm-6 col-md-4"
+            :key="proficiency"
+            v-for="proficiency in characterProficiencies"
+          >
+            <input
+              class="mx-2"
+              type="checkbox"
+              v-bind:value="proficiency.name"
+              v-model="backgroundProficiencySelection"
+              v-bind:disabled="
+                (backgroundProficiencySelection.length === 2 &&
+                  backgroundProficiencySelection.indexOf(proficiency.name) ==
+                    -1) ||
+                proficiencySelection.includes(proficiency.name)
+              "
+            />
+            <label for="skill">{{ proficiency.name }}</label>
+          </span>
+          <hr />
+        </div>
+        <!-- Languages -->
+        <div v-if="raceSelection" class="mb-2">
+          <div class="row" v-if="raceSelection === 'Human'">
+            <p>Select 3 languages</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="language"
+              v-for="language in languages"
+            >
               <input
                 class="mx-2"
                 type="checkbox"
-                v-bind:value="Object.keys(skill)[0]"
-                v-model="backgroundProficiencySelection"
+                v-bind:value="language.name"
+                v-model="languageProficienciesSelection"
                 v-bind:disabled="
-                  backgroundProficiencySelection.length === 2 &&
-                  backgroundProficiencySelection.indexOf(
-                    Object.keys(skill)[0]
-                  ) == -1
+                  (languageProficienciesSelection.length ===
+                    amountOfLanguages &&
+                    languageProficienciesSelection.indexOf(language.name) ==
+                      -1) ||
+                  knownLanguages[0].name.includes(language.name)
                 "
               />
-              <label for="skill">{{ Object.keys(skill)[0] }}</label>
+              <label for="skill">{{ language.name }}</label>
+            </span>
+          </div>
+          <div class="row" v-else>
+            <p>Select 2 languages</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="language"
+              v-for="language in languages"
+            >
+              <input
+                class="mx-2"
+                type="checkbox"
+                v-bind:value="language.name"
+                v-model="languageProficienciesSelection"
+                v-bind:disabled="
+                  (languageProficienciesSelection.length ===
+                    amountOfLanguages &&
+                    languageProficienciesSelection.indexOf(language.name) ==
+                      -1) ||
+                  knownLanguages[0].name.includes(language.name) ||
+                  knownLanguages[1].name.includes(language.name)
+                "
+              />
+              <label for="skill">{{ language.name }}</label>
+            </span>
+          </div>
+        </div>
+        <!-- Tools -->
+        <div class="row" v-if="raceSelection === 'Dwarf'">
+          <hr />
+          <p>Select 1 tool</p>
+          <span
+            class="col-12 col-sm-6 col-md-4"
+            :key="tool"
+            v-for="tool in dwarfTools"
+          >
+            <input
+              class="mx-2"
+              type="checkbox"
+              v-bind:value="tool.name"
+              v-model="dawrfToolSelection"
+              v-bind:disabled="
+                dawrfToolSelection.length === 1 &&
+                dawrfToolSelection.indexOf(tool.name) == -1
+              "
+            />
+            <label for="tool.name">{{ tool.name }}</label>
+          </span>
+        </div>
+        <div class="row" v-if="classSelection === 'Bard'">
+          <hr />
+          <p>Select 3 instruments</p>
+          <span
+            class="col-12 col-sm-6 col-md-4"
+            :key="tool"
+            v-for="tool in classTools"
+          >
+            <input
+              class="mx-2"
+              type="checkbox"
+              v-bind:value="tool.name"
+              v-model="toolProficienciesSelection"
+              v-bind:disabled="
+                toolProficienciesSelection.length === 3 &&
+                toolProficienciesSelection.indexOf(tool.name) == -1
+              "
+            />
+            <label for="tool.name">{{ tool.name }}</label>
+          </span>
+        </div>
+        <div class="row" v-if="classSelection === 'Monk'">
+          <hr />
+          <p>Select 1</p>
+          <span class="col-12 col-sm-6 col-md-4">
+            <input
+              class="mx-2"
+              type="checkbox"
+              v-bind:value="'Artisans Tools'"
+              v-model="toolProficiencies"
+              v-bind:disabled="
+                toolProficiencies.length === 1 &&
+                toolProficiencies.includes('Musical Instruments')
+              "
+            />
+            <label for="Artisans Tools">Artisans Tools</label>
+          </span>
+          <span class="col-12 col-sm-6 col-md-4">
+            <input
+              class="mx-2"
+              type="checkbox"
+              v-bind:value="'Musical Instruments'"
+              v-model="toolProficiencies"
+              v-bind:disabled="
+                toolProficiencies.length === 1 &&
+                toolProficiencies.includes('Artisans Tools')
+              "
+            />
+            <label for="Musical Instruments">Musical Instruments</label>
+          </span>
+          <span v-if="toolProficiencies[0] === 'Artisans Tools'">
+            <p>Select 1 tool</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="tool"
+              v-for="tool in artisanTools"
+            >
+              <input
+                class="mx-2"
+                type="checkbox"
+                v-bind:value="tool.name"
+                v-model="toolProficienciesSelection"
+                v-bind:disabled="
+                  toolProficienciesSelection.length === 1 &&
+                  toolProficienciesSelection.indexOf(tool.name) == -1
+                "
+              />
+              <label for="tool.name">{{ tool.name }}</label>
+            </span>
+          </span>
+          <span v-if="toolProficiencies[0] === 'Musical Instruments'">
+            <p>Select 1 instrument</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="tool"
+              v-for="tool in classTools"
+            >
+              <input
+                class="mx-2"
+                type="checkbox"
+                v-bind:value="tool.name"
+                v-model="toolProficienciesSelection"
+                v-bind:disabled="
+                  toolProficienciesSelection.length === 1 &&
+                  toolProficienciesSelection.indexOf(tool.name) == -1
+                "
+              />
+              <label for="tool.name">{{ tool.name }}</label>
             </span>
           </span>
         </div>
@@ -459,6 +651,63 @@
         aria-labelledby="spells-tab"
       >
         <div v-if="classSelection">
+          <div
+            class="row"
+            v-if="
+              knownSpellCasters.includes(classSelection) ||
+              selectSpellCasters.includes(classSelection)
+            "
+          >
+            <p>Select {{ amountOfSpells.cantrips_known }} cantrips</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="spell"
+              v-for="spell in classSpells"
+            >
+              <span :key="cantrip" v-for="cantrip in cantrips">
+                <span v-if="spell.name === cantrip">
+                  <input
+                    class="mx-2"
+                    type="checkbox"
+                    v-bind:value="spell.name"
+                    v-model="selectedCantrips"
+                    v-bind:disabled="
+                      selectedCantrips.length ===
+                        amountOfSpells.cantrips_known &&
+                      selectedCantrips.indexOf(spell.name) == -1
+                    "
+                  />
+                  <label for="skill">{{ spell.name }}</label>
+                </span>
+              </span>
+            </span>
+          </div>
+          <!-- <div class="row" v-else>
+            <p>Select {{ amountOfSpells.cantrips_known }} cantrips</p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="spell"
+              v-for="spell in classSpells"
+            >
+              <span :key="cantrip" v-for="cantrip in cantrips">
+                <span v-if="spell.name === cantrip">
+                  <input
+                    class="mx-2"
+                    type="checkbox"
+                    v-bind:value="spell.name"
+                    v-model="selectedCantrips"
+                    v-bind:disabled="
+                      selectedCantrips.length ===
+                        amountOfSpells.cantrips_known &&
+                      selectedCantrips.indexOf(spell.name) == -1
+                    "
+                  />
+                  <label for="skill">{{ spell.name }}</label>
+                </span>
+              </span>
+            </span>
+          </div> -->
+          <hr />
           <div v-if="knownSpellCasters.includes(classSelection)">
             <p>
               Besides cantrips a {{ classSelection }} does not need to select
@@ -467,7 +716,10 @@
           </div>
           <div
             class="row"
-            v-else-if="selectSpellCasters.includes(classSelection)"
+            v-else-if="
+              selectSpellCasters.includes(classSelection) &&
+              classSelection != 'Wizard'
+            "
           >
             <p>Select {{ amountOfSpells.spells_known }} spells to learn.</p>
             <span
@@ -488,17 +740,33 @@
               <label for="skill">{{ spell.name }}</label>
             </span>
           </div>
+          <div class="row" v-else-if="classSelection === 'Wizard'">
+            <p>
+              Select
+              {{ savingThrows(characterAbilityScores.wis) + characterLevel }}
+              spells to learn.
+            </p>
+            <span
+              class="col-12 col-sm-6 col-md-4"
+              :key="spell"
+              v-for="spell in spells"
+            >
+              <input
+                class="mx-2"
+                type="checkbox"
+                v-bind:value="spell.name"
+                v-model="selectedSpells"
+                v-bind:disabled="
+                  selectedSpells.length ===
+                    savingThrows(characterAbilityScores.wis) + characterLevel &&
+                  selectedSpells.indexOf(spell.name) == -1
+                "
+              />
+              <label for="skill">{{ spell.name }}</label>
+            </span>
+          </div>
           <div v-else>No spells to learn.</div>
         </div>
-        <!-- <p>Select cantrips</p>
-          <p :key="spell" v-for="spell in spells">
-            {{ spell.name }}
-          </p>
-        </div> -->
-        <!-- <div v-if="spellCasters.includes(classSelection)">
-          <div>Cantrips known: {{ spells[0].spellcasting.cantrips_known }}</div>
-          <div>Spells known: {{ spells[0].spellcasting.spells_known }}</div>
-        </div> -->
       </div>
       <!-- Equipment tab -->
       <div
@@ -506,15 +774,11 @@
         id="equipment"
         role="tabpanel"
         aria-labelledby="equipment-tab"
-        :key="equip"
-        v-for="equip in equipments"
       >
-        <!-- <p>Select {{ equip.choose }} from the list</p>
-        <div :key="item" v-for="item in equip.from">
-          {{ item.equipment.name }}
-          {{ item.equipment_option }}
+        <p>Your character starts with.</p>
+        <div :key="item" v-for="item in equipment">
+          <p>{{ item.quantity }} x {{ item.equipment.name }}</p>
         </div>
-        {{ equip.from[0].equipment.name }} -->
       </div>
     </div>
     <hr />
@@ -600,13 +864,68 @@ export default {
       knownSpellCasters: ["Cleric", "Druid"],
       selectSpellCasters: ["Bard", "Sorcerer", "Warlock", "Wizard"],
       proficiencyChoices: null,
+      characterProficiencies: null,
       amountOfProficiencies: 1,
+      amountOfLanguages: 4,
+      languageProficiencies: null,
+      languages: null,
+      knownLanguages: null,
+
+      dwarfTools: null,
+      artisanTools: null,
+      classTools: null,
+      toolProficiencies: [],
+
       amountOfSpells: 0,
-      languageToolProficiencies: null,
-      cantrips: null,
+      classSpells: [],
+      cantrips: [
+        "Acid Splash",
+        "Blade Ward",
+        "Booming Blade",
+        "Chill Touch",
+        "Control Flames",
+        "Create Bonfire",
+        "Dancing Lights",
+        "Druidcraft",
+        "Eldritch Blast",
+        "Encode Thoughts",
+        "Fire Bolt",
+        "Friends",
+        "Frostbite",
+        "Green-Flame Blade",
+        "Guidance",
+        "Gust",
+        "Light",
+        "Lightning Lure",
+        "Mage Hand",
+        "Mending",
+        "Message",
+        "Mind Sliver",
+        "Minor Illusion",
+        "Mold Earth",
+        "Poison Spray",
+        "Prestidigitation",
+        "Primal Savagery",
+        "Produce Flame",
+        "Resistance",
+        "Sacred Flame",
+        "Sapping Sting",
+        "Shape Water",
+        "Shillelagh",
+        "Shocking Grasp",
+        "Spare the Dying",
+        "Sword Burst",
+        "Thaumaturgy",
+        "Thorn Whip",
+        "Thunderclap",
+        "Toll the Dead",
+        "True Strike",
+        "Vicious Mockery",
+        "Word of Radiance",
+      ],
       spells: null,
-      equipments: null,
-      item: null,
+      equipment: null,
+      // item: null,
       Custom: null,
 
       name: null,
@@ -621,7 +940,7 @@ export default {
       backstory: null,
       armorClass: 1,
       hitPoints: 1,
-      Speed: 1,
+      speed: 1,
       passivePerception: 1,
       darkVision: 1,
       background: null,
@@ -642,15 +961,20 @@ export default {
         str: 0,
         wis: 0,
       },
-      cantripsSelection: "lights",
+      selectedCantrips: [],
       selectedSpells: [],
-      languageToolProficienciesSelection: "dwarfish",
-      equipmentSelection: "longsword",
-      testapi: null,
+      languageProficienciesSelection: [],
+      toolProficienciesSelection: [],
+      dawrfToolSelection: [],
+      equipmentSelection: [],
     };
   },
   methods: {
-    test() {},
+    test() {
+      console.log(this.equipment);
+      this.setEquipment();
+      console.log(this.equipmentSelection);
+    },
     getUser() {
       axios({
         method: "get",
@@ -674,28 +998,24 @@ export default {
     },
 
     getSubRace() {
-      console.log("do things");
       this.subRaces = null;
       if (this.raceSelection === "Dragonborn") {
         axios({
           method: "get",
           url: url + "traits/draconic-ancestry",
         }).then((response) => {
-          console.log("dragon worked");
           this.dragonAncestory =
             response.data.trait_specific.subtrait_options.from;
           if (this.dragonAncestory.length < 1) {
             this.dragonAncestory = null;
           }
         });
-        console.log(this.dragonAncestory);
       } else {
         this.dragonAncestory = null;
         axios({
           method: "get",
           url: url + "races/" + this.raceSelection.toLowerCase() + "/subraces",
         }).then((response) => {
-          console.log("other worked");
           this.subRaces = response.data.results;
           if (this.subRaces.length < 1) {
             this.subRaces = null;
@@ -746,19 +1066,64 @@ export default {
     },
     getProficiencyChoices() {
       this.amountOfProficiencies = [];
+      this.classTools = [];
       axios({
         method: "get",
         url: url + "classes/" + this.classSelection.toLowerCase(),
       }).then((response) => {
         if (this.classSelection === "Monk") {
-          this.proficiencyChoices = response.data.proficiencySelection[2].from;
+          this.proficiencyChoices = response.data.proficiency_choices[2].from;
           this.amountOfProficiencies =
-            response.data.proficiencySelection[2].choose;
+            response.data.proficiency_choices[2].choose;
+          this.classTools = response.data.proficiency_choices[1].from;
+          this.artisanTools = response.data.proficiency_choices[0].from;
         } else {
           this.proficiencyChoices = response.data.proficiency_choices[0].from;
           this.amountOfProficiencies =
             response.data.proficiency_choices[0].choose;
+          if (this.classSelection === "Bard") {
+            this.classTools = response.data.proficiency_choices[1].from;
+          }
         }
+      });
+    },
+    getBackgroundProficiency() {
+      axios({
+        method: "get",
+        url: url + "skills",
+      }).then((response) => {
+        this.characterProficiencies = response.data.results;
+      });
+    },
+    getKnownLanguages() {
+      this.languageProficienciesSelection = [];
+      this.knownLanguages = [];
+      axios({
+        method: "get",
+        url: url + `races/${this.raceSelection.toLowerCase()}`,
+      }).then((response) => {
+        this.knownLanguages = response.data.languages;
+        this.languageProficienciesSelection = this.knownLanguages.map(function (
+          element
+        ) {
+          return element.name;
+        });
+      });
+    },
+    getAllLanguages() {
+      axios({
+        method: "get",
+        url: url + `/languages`,
+      }).then((response) => {
+        this.languages = response.data.results;
+      });
+    },
+    getClassSpells() {
+      axios({
+        method: "get",
+        url: url + `classes/${this.classSelection.toLowerCase()}/spells`,
+      }).then((response) => {
+        this.classSpells = response.data.results;
       });
     },
     getSpells() {
@@ -790,13 +1155,13 @@ export default {
       });
     },
     getEquipment() {
+      this.equipment = [];
       axios({
         method: "get",
         url: url + "classes/" + this.classSelection.toLowerCase(),
       }).then((response) => {
-        this.equipments = response.data.starting_equipment_options;
+        this.equipment = response.data.starting_equipment;
       });
-      console.log(this.equipment);
     },
     savingThrows(ability) {
       let save = 0;
@@ -938,6 +1303,14 @@ export default {
           this.characterAbilityScores.int += 2;
       }
     },
+    getDwarfTools() {
+      axios({
+        method: "get",
+        url: url + "races/dwarf",
+      }).then((response) => {
+        this.dwarfTools = response.data.starting_proficiency_options.from;
+      });
+    },
     setAbility(ability) {
       if (ability.name.toLowerCase() === "cha") {
         this.characterAbilityScores.cha = ability.value;
@@ -957,7 +1330,6 @@ export default {
       if (ability.name.toLowerCase() === "wis") {
         this.characterAbilityScores.wis = ability.value;
       }
-      console.log(this.characterAbilityScores);
     },
     getSpeed() {
       axios({
@@ -966,7 +1338,6 @@ export default {
       }).then((response) => {
         this.speed = response.data.speed;
       });
-      console.log(this.equipment);
     },
     setArmorClass() {
       this.armorClass = 10 + this.savingThrows(this.characterAbilityScores.dex);
@@ -977,8 +1348,8 @@ export default {
         this.savingThrows(this.characterAbilityScores.con);
     },
     convertToString(array) {
-      let newList = array.join();
-      return newList;
+      let newString = array.join();
+      return newString;
     },
     setProficiencies() {
       if (this.background === "Acolyte") {
@@ -988,15 +1359,39 @@ export default {
         this.backgroundProficiencySelection
       );
     },
+    addAcoclyteProficiency() {
+      if (this.background === "Acolyte") {
+        this.backgroundProficiencySelection = ["Religion", "Insight"];
+      } else {
+        this.backgroundProficiencySelection = [];
+      }
+    },
+    setSpells() {
+      this.sp;
+    },
+    setTools() {
+      if (this.raceSelection === "Dwarf") {
+        this.toolProficienciesSelection.push(this.dawrfToolSelection);
+      }
+    },
+    setEquipment() {
+      for (let i = 0; i < this.equipment.length; i++) {
+        this.equipmentSelection.push(this.equipment[i]);
+      }
+    },
     createCharacter() {
       this.setProficiencies();
       this.setHitPoints();
       this.setArmorClass();
       this.raceBonus();
+      this.setTools();
+      this.setEquipment();
       axios({
         method: "post",
         url: "https://character-creator-drf.herokuapp.com/characters/",
-        headers: { Authorization: `Bearer ${this.$store.state.accessToken}` },
+        headers: {
+          Authorization: `Bearer ${this.$store.state.accessToken}`,
+        },
         data: {
           user: this.username[0].id,
           name: this.name,
@@ -1012,7 +1407,7 @@ export default {
           armorClass: this.armorClass,
           hitPoints: this.hitPoints,
           currentHitPoints: this.hitPoints,
-          Speed: this.Speed,
+          speed: this.speed,
           passivePerception: this.passivePerception,
           darkVision: this.darkVision,
           background: this.background,
@@ -1028,10 +1423,15 @@ export default {
           int: this.characterAbilityScores.int,
           str: this.characterAbilityScores.str,
           wis: this.characterAbilityScores.wis,
-          languageToolProficienciesSelection:
-            this.languageToolProficienciesSelection,
-          cantripsSelection: this.cantripsSelection,
-          equipment: this.equipmentSelection,
+          languageProficienciesSelection: this.convertToString(
+            this.languageProficienciesSelection
+          ),
+          toolProficienciesSelection: this.convertToString(
+            this.toolProficienciesSelection
+          ),
+          spellSelection: this.convertToString(this.selectedSpells),
+          cantripsSelection: this.convertToString(this.selectedCantrips),
+          equipment: this.convertToString(this.equipmentSelection),
         },
       })
         .then(() => {
@@ -1042,6 +1442,9 @@ export default {
         });
     },
   },
+  mounted() {
+    this.getBackgroundProficiency();
+  },
   created() {
     this.getRaces();
     this.getClasses();
@@ -1049,6 +1452,7 @@ export default {
     this.getAlignments();
     this.getBackgrounds();
     this.getUser();
+    this.getDwarfTools();
 
     axios({
       method: "get",

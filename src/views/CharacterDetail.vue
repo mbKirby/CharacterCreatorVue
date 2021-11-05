@@ -31,7 +31,7 @@
           <p class="fs-5">Initiative: {{ savingThrows(character.dex) }}</p>
         </span>
         <span class="col-3">
-          <p class="fs-5">Speed: {{ character.Speed }}</p>
+          <p class="fs-5">Speed: {{ character.speed }}</p>
         </span>
       </div>
       <div>
@@ -42,6 +42,7 @@
         <p class="fs-5">
           Current Hit Points:
           <input
+            style="width: 3em"
             type="number"
             name="currentHP"
             id="currentHP"
@@ -51,7 +52,45 @@
       </div>
     </div>
 
-    <div></div>
+    <div class="row justify-content-center">
+      <span class="col-6 text-center">
+        <div>Hit Die</div>
+        <div>{{ hitDie[`${clas}`] }}</div>
+      </span>
+      <span class="col-6 text-center">
+        <div>
+          <p>Death Saves</p>
+          <div>
+            <label class="form-check-label" style="float: left" for="save1"
+              >Saves</label
+            >
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="save1" />
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="save2" />
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="save3" />
+            </div>
+          </div>
+          <div>
+            <label class="form-check-label" style="float: left" for="save1"
+              >Fails</label
+            >
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="fail1" />
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="fail2" />
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="fail3" />
+            </div>
+          </div>
+        </div>
+      </span>
+    </div>
 
     <div class="row text-center">
       <div class="col border">
@@ -127,8 +166,17 @@
       </div>
     </div>
 
+    <div class="row justify-content-evenly">
+      <p>Spells</p>
+      <div class="col-6" :key="spell" v-for="spell in spells">
+        {{ spell }}
+      </div>
+    </div>
+
     <div class="row justify-content-evenly mt-3">
-      <button class="btn-primary btn col-2" @click="saveCharacter">Save</button>
+      <button disabled class="btn-primary btn col-2" @click="saveCharacter">
+        Save
+      </button>
       <button class="btn-primary btn col-2" @click="deleteCharacter">
         Delete
       </button>
@@ -184,6 +232,7 @@ export default {
         Warlock: 8,
         Wizard: 6,
       },
+      spells: [],
     };
   },
   methods: {
@@ -269,17 +318,18 @@ export default {
       }
       return save;
     },
+    toList(string) {
+      let newList = string.split(",");
+      return newList;
+    },
     addProficiencies() {
       this.clas = this.character.classSelection;
-      let characterProficiencies =
-        this.character.chosenProficiencies.split(",");
-      console.log(characterProficiencies);
-      console.log(characterProficiencies[1]);
-      console.log(Object.keys(this.proficiencies.str[0])[0]);
+      let characterProficiencies = this.toList(
+        this.character.chosenProficiencies
+      );
       if (
         Object.keys(this.proficiencies.str[0])[0] === characterProficiencies[1]
       ) {
-        console.log("equal");
       }
       for (let i = 0; i < characterProficiencies.length; i++) {
         switch (characterProficiencies[i]) {
@@ -345,6 +395,13 @@ export default {
         }
       }
     },
+    changeSpells() {
+      this.spells = this.toList(this.character.spellSelection);
+    },
+    getCharacterSkills() {
+      this.addProficiencies();
+      this.changeSpells();
+    },
     deleteCharacter() {
       axios({
         method: "delete",
@@ -395,7 +452,7 @@ export default {
   },
   mounted() {},
   created() {
-    this.getCharacter().then(() => this.addProficiencies());
+    this.getCharacter().then(() => this.getCharacterSkills());
   },
 };
 </script>

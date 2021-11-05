@@ -8,11 +8,9 @@
         alt="party inside tavern"
       />
     </div>
-    <nav class="col-12 navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="col-12 navbar navbar-expand-lg navbar-light bg-white">
       <div class="col-12">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#"></a>
-
           <button
             class="navbar-toggler"
             type="button"
