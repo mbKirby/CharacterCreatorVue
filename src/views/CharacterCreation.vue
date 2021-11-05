@@ -297,7 +297,6 @@
                 getEquipment();
                 getSpells();
                 getClassSpells();
-                setSpellsNow();
               "
             />
             <label class="form-check-label" for="clas.name">
@@ -1137,6 +1136,11 @@ export default {
       })
         .then((response) => {
           this.spells = response.data.results;
+          if (this.knownSpellCasters.includes(this.classSelection)) {
+            this.selectedSpells = this.spells.map(function (element) {
+              return element.name;
+            });
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -1152,30 +1156,6 @@ export default {
       }).then((response) => {
         this.amountOfSpells = response.data.spellcasting;
       });
-    },
-    setSpells() {
-      if (this.knownSpellCasters.includes(this.classSelection)) {
-        this.selectedSpells = [];
-
-        axios({
-          method: "get",
-          url:
-            url +
-            `classes/${this.classSelection.toLowerCase()}/levels/${
-              this.characterLevel
-            }/spells`,
-        }).then((response) => {
-          this.spells = response.data.results;
-        });
-      }
-    },
-    setKnownSpells() {
-      this.selectedSpells = this.spells.map(function (element) {
-        return `${element.name}`;
-      });
-    },
-    setSpellsNow() {
-      this.setSpells().then(() => this.setKnownSpells());
     },
     getEquipment() {
       this.equipment = [];

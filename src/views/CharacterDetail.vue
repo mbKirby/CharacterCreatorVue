@@ -170,6 +170,19 @@
       </div>
     </div>
 
+    <div class="row text-center">
+      <p id="spells" class="fs-5">Language proficiencies</p>
+      <div class="col-6" :key="language" v-for="language in languages">
+        {{ language }}
+      </div>
+      <div id="spells" class="row" v-if="character.toolProficienciesSelection">
+        <p class="fs-5">Tool proficiencies</p>
+        <div class="col-6" :key="tool" v-for="tool in tools">
+          {{ tool }}
+        </div>
+      </div>
+    </div>
+
     <div class="mt-2 row justify-content-center text-center">
       <select class="col-2" v-model.number="diceType" id="subRaceSelection">
         <option selected>20</option>
@@ -185,19 +198,11 @@
       <p class="pt-2" v-if="roll != null">You rolled a {{ roll }}</p>
     </div>
 
-    <div class="row mb-4 justify-content-center text-center">
-      <div class="col-6">
-        <div v-if="character.cantripsSelection">
-          <p id="spells" class="fs-5 mb-1">Cantrips</p>
-          <div :key="cantrip" v-for="cantrip in cantrips">
-            {{ cantrip }}
-          </div>
-        </div>
-        <div class="pt-2" v-if="character.spellSelection">
-          <p id="spells" class="fs-5 mb-1">Spells</p>
-          <div :key="spell" v-for="spell in spells">
-            {{ spell }}
-          </div>
+    <div class="row mb-4 justify-content-center text-center border">
+      <div class="col-6" v-if="character.cantripsSelection">
+        <p id="spells" class="fs-5 mb-1">Cantrips</p>
+        <div :key="cantrip" v-for="cantrip in cantrips">
+          {{ cantrip }}
         </div>
       </div>
       <div id="spells" class="col-6">
@@ -206,9 +211,15 @@
           <p>{{ item }}</p>
         </div>
       </div>
+      <div class="row pt-2" v-if="character.spellSelection">
+        <p id="spells" class="fs-5 mb-1">Spells</p>
+        <span class="col-6" :key="spell" v-for="spell in spells">
+          {{ spell }}
+        </span>
+      </div>
     </div>
 
-    <div class="mb-5 text-center">
+    <div class="mb-5 row text-center border">
       <div class="row justify-content-center">
         <div class="col-4">
           <input class="form-control" type="text" v-model="spell" />
@@ -296,6 +307,8 @@ export default {
         Warlock: 8,
         Wizard: 6,
       },
+      languages: null,
+      tools: null,
       spell: null,
       spellInfo: null,
       spellUrl: null,
@@ -475,10 +488,20 @@ export default {
     changeEquipment() {
       this.equipment = this.toList(this.character.equipment);
     },
+    changeLanguage() {
+      this.languages = this.toList(
+        this.character.languageProficienciesSelection
+      );
+    },
+    changeTools() {
+      this.tools = this.toList(this.character.toolProficienciesSelection);
+    },
     getCharacterSkills() {
       this.addProficiencies();
       this.changeSpells();
       this.changeEquipment();
+      this.changeLanguage();
+      this.changeTools();
     },
 
     findSpell() {
