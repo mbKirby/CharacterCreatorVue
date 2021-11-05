@@ -374,6 +374,7 @@
             </option>
           </select>
         </div>
+        <p>Select background</p>
         <div v-bind:key="backgroun.name" v-for="backgroun in backgrounds">
           <div class="form-check">
             <input
