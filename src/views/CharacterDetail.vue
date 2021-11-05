@@ -504,6 +504,7 @@ export default {
       this.changeTools();
     },
 
+    // checking
     findSpell() {
       axios({
         method: "get",
