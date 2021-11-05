@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div id="characterDetail" class="container">
     <!-- <button @click="roll_dice(hitDie[`${clas}`])">test</button>
     <p>roll:{{ roll }}</p>
     <p>{{ hitDie.Barbarian }} {{ clas }} {{ hitDie[`${clas}`] }}</p> -->
@@ -52,14 +52,18 @@
       </div>
     </div>
 
-    <div class="row justify-content-center">
-      <span class="col-6 text-center">
-        <div>Hit Die</div>
-        <div>{{ hitDie[`${clas}`] }}</div>
+    <div class="row justify-content-center border">
+      <span class="col-4 text-center">
+        <p class="fs-5">Hit Die</p>
+        <p class="fs-5">{{ hitDie[`${clas}`] }}</p>
       </span>
-      <span class="col-6 text-center">
+      <span class="col-4 text-center">
+        <p class="fs-5">Temporary Hit Points</p>
+        <input type="number" style="width: 3em" />
+      </span>
+      <span class="col-4 text-center">
         <div>
-          <p>Death Saves</p>
+          <p class="fs-5">Death Saves</p>
           <div>
             <label class="form-check-label" style="float: left" for="save1"
               >Saves</label
@@ -166,14 +170,72 @@
       </div>
     </div>
 
-    <div class="row justify-content-evenly">
-      <p>Spells</p>
-      <div class="col-6" :key="spell" v-for="spell in spells">
-        {{ spell }}
+    <div class="mt-2 row justify-content-center text-center">
+      <select class="col-2" v-model.number="diceType" id="subRaceSelection">
+        <option selected>20</option>
+        <option>12</option>
+        <option>10</option>
+        <option>8</option>
+        <option>6</option>
+        <option>4</option>
+      </select>
+      <button @click="roll_dice(diceType)" class="col-1 btn btn-primary">
+        Roll
+      </button>
+      <p class="pt-2" v-if="roll != null">You rolled a {{ roll }}</p>
+    </div>
+
+    <div class="row mb-4 justify-content-center text-center">
+      <div class="col-6">
+        <div v-if="character.cantripsSelection">
+          <p id="spells" class="fs-5 mb-1">Cantrips</p>
+          <div :key="cantrip" v-for="cantrip in cantrips">
+            {{ cantrip }}
+          </div>
+        </div>
+        <div class="pt-2" v-if="character.spellSelection">
+          <p id="spells" class="fs-5 mb-1">Spells</p>
+          <div :key="spell" v-for="spell in spells">
+            {{ spell }}
+          </div>
+        </div>
+      </div>
+      <div id="spells" class="col-6">
+        <p class="fs-5 mb-1">Equipment</p>
+        <div :key="item" v-for="item in equipment">
+          <p>{{ item }}</p>
+        </div>
       </div>
     </div>
 
-    <div class="row justify-content-evenly mt-3">
+    <div class="mb-5 text-center">
+      <div class="row justify-content-center">
+        <div class="col-4">
+          <input class="form-control" type="text" v-model="spell" />
+        </div>
+        <button @click="findSpell()" class="col-2 btn btn-primary">
+          Find Spell
+        </button>
+      </div>
+      <div v-if="spellDesc" class="text-center">
+        <h3>Spell Description</h3>
+        <p>
+          {{ spellDesc.desc[0] }}
+        </p>
+        <div v-if="spellDesc.higher_level">
+          <h3>Spell usage at higher level</h3>
+          <p>
+            {{ spellDesc.higher_level[0] }}
+          </p>
+        </div>
+        <h3>Range</h3>
+        <p>
+          {{ spellDesc.range }}
+        </p>
+      </div>
+    </div>
+
+    <div class="row justify-content-evenly mt-5">
       <button disabled class="btn-primary btn col-2" @click="saveCharacter">
         Save
       </button>
@@ -181,6 +243,7 @@
         Delete
       </button>
     </div>
+    <!-- <button @click="test">test</button> -->
   </div>
 </template>
 <script>
@@ -217,7 +280,8 @@ export default {
           { Survival: 0 },
         ],
       },
-      roll: 1,
+      roll: null,
+      diceType: 20,
       hitDie: {
         Barbarian: 12,
         Bard: 8,
@@ -232,10 +296,19 @@ export default {
         Warlock: 8,
         Wizard: 6,
       },
+      spell: null,
+      spellInfo: null,
+      spellUrl: null,
+      spellDesc: null,
       spells: [],
+      cantrips: [],
+      equipment: [],
     };
   },
   methods: {
+    test() {
+      console.log(this.cantrips);
+    },
     getCharacter() {
       return axios({
         method: "get",
@@ -397,10 +470,34 @@ export default {
     },
     changeSpells() {
       this.spells = this.toList(this.character.spellSelection);
+      this.cantrips = this.toList(this.character.cantripsSelection);
+    },
+    changeEquipment() {
+      this.equipment = this.toList(this.character.equipment);
     },
     getCharacterSkills() {
       this.addProficiencies();
       this.changeSpells();
+      this.changeEquipment();
+    },
+
+    findSpell() {
+      axios({
+        method: "get",
+        url: "https://www.dnd5eapi.co/api/spells",
+        params: {
+          name: this.spell,
+        },
+      }).then((response) => {
+        this.spellInfo = response.data.results;
+        this.spellUrl = this.spellInfo[0].url;
+        axios({
+          method: "get",
+          url: "https://www.dnd5eapi.co" + this.spellUrl,
+        }).then((response) => {
+          this.spellDesc = response.data;
+        });
+      });
     },
     deleteCharacter() {
       axios({

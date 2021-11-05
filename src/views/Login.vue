@@ -1,6 +1,6 @@
 <template>
-  <div class="row justify-content-center">
-    <form class="text-center col-6 border mt-2" v-on:submit.prevent="login">
+  <div id="login" class="row justify-content-center">
+    <form class="text-center col-6 mt-2" v-on:submit.prevent="login">
       <p v-if="incorrectAuth">
         Incorrect username or password entered - please try again
       </p>

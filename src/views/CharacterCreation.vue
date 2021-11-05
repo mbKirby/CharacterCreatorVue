@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div id="cc" class="container">
     <nav>
       <div
         class="justify-content-evenly nav nav-tabs"
@@ -297,6 +297,7 @@
                 getEquipment();
                 getSpells();
                 getClassSpells();
+                setSpellsNow();
               "
             />
             <label class="form-check-label" for="clas.name">
@@ -971,9 +972,7 @@ export default {
   },
   methods: {
     test() {
-      console.log(this.equipment);
-      this.setEquipment();
-      console.log(this.equipmentSelection);
+      console.log(this.selectedSpells);
     },
     getUser() {
       axios({
@@ -1153,6 +1152,30 @@ export default {
       }).then((response) => {
         this.amountOfSpells = response.data.spellcasting;
       });
+    },
+    setSpells() {
+      if (this.knownSpellCasters.includes(this.classSelection)) {
+        this.selectedSpells = [];
+
+        axios({
+          method: "get",
+          url:
+            url +
+            `classes/${this.classSelection.toLowerCase()}/levels/${
+              this.characterLevel
+            }/spells`,
+        }).then((response) => {
+          this.spells = response.data.results;
+        });
+      }
+    },
+    setKnownSpells() {
+      this.selectedSpells = this.spells.map(function (element) {
+        return `${element.name}`;
+      });
+    },
+    setSpellsNow() {
+      this.setSpells().then(() => this.setKnownSpells());
     },
     getEquipment() {
       this.equipment = [];
@@ -1366,18 +1389,15 @@ export default {
         this.backgroundProficiencySelection = [];
       }
     },
-    setSpells() {
-      this.sp;
-    },
     setTools() {
       if (this.raceSelection === "Dwarf") {
         this.toolProficienciesSelection.push(this.dawrfToolSelection);
       }
     },
     setEquipment() {
-      for (let i = 0; i < this.equipment.length; i++) {
-        this.equipmentSelection.push(this.equipment[i]);
-      }
+      this.equipmentSelection = this.equipment.map(function (element) {
+        return `${element.quantity} x ${element.equipment.name}`;
+      });
     },
     createCharacter() {
       this.setProficiencies();

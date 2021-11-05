@@ -1,6 +1,6 @@
 <template>
-  <div class="row justify-content-center">
-    <form class="text-center col-6 border mt-2" v-on:submit.prevent="signup">
+  <div id="signup" class="row justify-content-center">
+    <form class="text-center col-6 mt-2" v-on:submit.prevent="signup">
       <p v-if="!match">Your Password doesn't match please try again.</p>
       <h2>SignUp</h2>
       <div class="form-group my-1">

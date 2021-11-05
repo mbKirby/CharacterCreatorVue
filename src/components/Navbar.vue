@@ -4,7 +4,7 @@
       <img
         style="height: auto"
         class="img-fluid"
-        src="https://github.com/mbKirby/CharacterCreator/blob/main/character_creator_vue/src/assets/navbarpic.jpg?raw=true"
+        src="https://raw.githubusercontent.com/mbKirby/CharacterCreatorVue/main/src/assets/navbarpic4.jpg"
         alt="party inside tavern"
       />
     </div>

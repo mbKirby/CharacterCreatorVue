@@ -1,11 +1,30 @@
+html {
+    min-height: 100%;
+}
+
+
 a{
     text-decoration:none;
 }
 a:hover{
     text-decoration:overline underline;
+} 
+
+#cc {
+    height: 100vh;
+}
+
+#cs ,#login, #signup {
+    height: 70vh;
+}
+
+#spells {
+    text-decoration: underline;
 }
 
 #whole {
+    height: auto;
+    min-height: 100%;
     font-family: 'Playfair Display', serif;
     background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);}
 

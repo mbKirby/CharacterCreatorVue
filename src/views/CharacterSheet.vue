@@ -1,13 +1,11 @@
 <template>
-  <div class="container">
-    <p>you made it</p>
+  <div id="cs" class="container text-center mt-3">
+    <p>Click on the character you want to view.</p>
     <div :key="character" v-for="character in data">
-      <router-link :to="`/details/${character.name}`">
+      <router-link class="mt-2" :to="`/details/${character.name}`">
         {{ character.name }}
       </router-link>
     </div>
-
-    <button @click="testing()">test</button>
   </div>
 </template>
 
