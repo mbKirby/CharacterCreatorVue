@@ -1124,6 +1124,7 @@ export default {
         this.classSpells = response.data.results;
       });
     },
+    // testing to repush
     getSpells() {
       this.selectedSpells = [];
       axios({
